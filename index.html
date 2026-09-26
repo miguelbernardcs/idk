@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Tela de Login -->
+    <div id="telaLogin" class="tela">
+        <div class="card-login">
+            <div class="logo">💬</div>
+            <h1>Chat Familiar</h1>
+            <p class="subtitulo">Digite a senha para entrar</p>
+            <input type="password" id="inputSenha" placeholder="Senha" autocomplete="off">
+            <button class="btn-primario" onclick="tentarLogin()">Entrar</button>
+            <p id="erroLogin" class="erro"></p>
+        </div>
+    </div>
+
+    <!-- Tela de Nome -->
+    <div id="telaNome" class="tela oculto">
+        <div class="card-login">
+            <div class="logo">👤</div>
+            <h1>Bem-vindo!</h1>
+            <p class="subtitulo">Como quer ser chamado?</p>
+            <input type="text" id="inputNome" placeholder="Seu nome" maxlength="20">
+            <button class="btn-primario" onclick="confirmarNome()">Começar</button>
+            <p id="erroNome" class="erro"></p>
+        </div>
+    </div>
+
+    <!-- Tela do Chat -->
+    <div id="telaChat" class="tela oculto">
+        <header class="header">
+            <div class="header-info">
+                <span class="status-dot"></span>
+                <h2>Chat Familiar</h2>
+            </div>
+            <span id="meuNome" class="meu-nome"></span>
+        </header>
+
+        <main id="mensagens" class="mensagens">
+            <div class="msg-sistema" id="placeholder">
+                <span>👋</span>
+                <p>Bem-vindo! Suas mensagens aparecerão aqui.</p>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <button class="btn-icon" onclick="document.getElementById('fileInput').click()" title="Enviar imagem">📷</button>
+            <input type="file" id="fileInput" accept="image/*" onchange="enviarImagem(this)">
+            <input type="text" id="entrada" placeholder="Digite sua mensagem..." maxlength="500">
+            <button class="btn-primario btn-enviar" onclick="enviar()">➤</button>
+        </footer>
+    </div>
+
+    <script type="importmap">
+    {
+        "imports": {
+            "firebase/app": "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js",
+            "firebase/database": "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js"
+        }
+    }
+    </script>
+    <script type="module" src="script.js"></script>
+</body>
+</html>   
