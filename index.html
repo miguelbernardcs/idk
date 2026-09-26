@@ -6,7 +6,6 @@
     <title>Chat</title>
     <link rel="stylesheet" href="style.css">
 </head>
-<script type="module" src="script.js"></script>
 <body>
 
     <!-- Tela de Nome -->
@@ -92,20 +91,12 @@
 
         <footer class="footer">
             <button class="btn-icon" onclick="document.getElementById('fileInput').click()" title="Enviar imagem">📷</button>
-            <input type="file" id="fileInput" accept="image/*" onchange="enviarImagem(this)">
+            <input type="file" id="fileInput" accept="image/*" onchange="enviarImagem(this)" style="display:none">
             <input type="text" id="entrada" placeholder="Digite sua mensagem..." maxlength="500">
             <button class="btn-primario btn-enviar" onclick="enviar()">➤</button>
         </footer>
     </div>
 
-    <script type="importmap">
-    {
-        "imports": {
-            "firebase/app": "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js",
-            "firebase/database": "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js"
-        }
-    }
-    </script>
     <script type="module" src="script.js"></script>
 </body>
-</html>   
+</html>
