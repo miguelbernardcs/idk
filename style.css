@@ -1,4 +1,3 @@
-/* ===== VARIÁVEIS ===== */
 :root {
     --bg: #0f0f1a;
     --bg-card: #1a1a2e;
@@ -15,12 +14,7 @@
     --transicao: 0.2s ease;
 }
 
-/* ===== RESET ===== */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
     font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
@@ -30,20 +24,11 @@ body {
     overflow: hidden;
 }
 
-/* ===== TELAS ===== */
-.tela {
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-}
+.tela { height: 100vh; display: flex; flex-direction: column; }
+.oculto { display: none !important; }
 
-.oculto {
-    display: none !important;
-}
-
-/* ===== LOGIN / NOME ===== */
-#telaLogin,
-#telaNome {
+/* ===== TELAS DE ACESSO ===== */
+#telaNome, #telaCriarSenha, #telaSenha, #telaGrupos {
     align-items: center;
     justify-content: center;
     background: linear-gradient(135deg, #0f0f1a 0%, #1a1a3e 50%, #0f0f1a 100%);
@@ -66,21 +51,9 @@ body {
     to   { opacity: 1; transform: translateY(0); }
 }
 
-.logo {
-    font-size: 3rem;
-    margin-bottom: 12px;
-}
-
-.card-login h1 {
-    font-size: 1.6rem;
-    margin-bottom: 6px;
-}
-
-.subtitulo {
-    color: var(--texto-suave);
-    font-size: 0.9rem;
-    margin-bottom: 24px;
-}
+.logo { font-size: 3rem; margin-bottom: 12px; }
+.card-login h1 { font-size: 1.6rem; margin-bottom: 6px; }
+.subtitulo { color: var(--texto-suave); font-size: 0.9rem; margin-bottom: 24px; }
 
 .card-login input {
     width: 100%;
@@ -95,9 +68,7 @@ body {
     outline: none;
 }
 
-.card-login input:focus {
-    border-color: var(--acento);
-}
+.card-login input:focus { border-color: var(--acento); }
 
 .btn-primario {
     width: 100%;
@@ -112,21 +83,10 @@ body {
     transition: background var(--transicao), transform var(--transicao);
 }
 
-.btn-primario:hover {
-    background: var(--acento-hover);
-    transform: translateY(-1px);
-}
+.btn-primario:hover { background: var(--acento-hover); transform: translateY(-1px); }
+.btn-primario:active { transform: translateY(0); }
 
-.btn-primario:active {
-    transform: translateY(0);
-}
-
-.erro {
-    color: #ff6b6b;
-    font-size: 0.85rem;
-    margin-top: 12px;
-    min-height: 1.2em;
-}
+.erro { color: #ff6b6b; font-size: 0.85rem; margin-top: 12px; min-height: 1.2em; }
 
 /* ===== HEADER ===== */
 .header {
@@ -139,24 +99,17 @@ body {
     box-shadow: 0 2px 12px var(--sombra);
 }
 
-.header-info {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.header h2 {
-    font-size: 1.1rem;
-    font-weight: 600;
-}
+.header-info { display: flex; align-items: center; gap: 10px; }
+.header h2 { font-size: 1.1rem; font-weight: 600; }
 
 .status-dot {
-    width: 10px;
-    height: 10px;
+    width: 10px; height: 10px;
     border-radius: 50%;
     background: #4ade80;
     box-shadow: 0 0 8px #4ade80;
 }
+
+.header-acoes { display: flex; align-items: center; gap: 8px; }
 
 .meu-nome {
     font-size: 0.85rem;
@@ -177,18 +130,9 @@ body {
     scroll-behavior: smooth;
 }
 
-.mensagens::-webkit-scrollbar {
-    width: 6px;
-}
-
-.mensagens::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-.mensagens::-webkit-scrollbar-thumb {
-    background: var(--borda);
-    border-radius: 3px;
-}
+.mensagens::-webkit-scrollbar { width: 6px; }
+.mensagens::-webkit-scrollbar-track { background: transparent; }
+.mensagens::-webkit-scrollbar-thumb { background: var(--borda); border-radius: 3px; }
 
 .msg {
     max-width: 75%;
@@ -204,36 +148,13 @@ body {
     to   { opacity: 1; transform: translateY(0); }
 }
 
-.msg-outra {
-    align-self: flex-start;
-    background: var(--bg-msg);
-    border-bottom-left-radius: 4px;
-}
+.msg-outra { align-self: flex-start; background: var(--bg-msg); border-bottom-left-radius: 4px; }
+.msg-propria { align-self: flex-end; background: var(--bg-msg-own); border-bottom-right-radius: 4px; }
 
-.msg-propria {
-    align-self: flex-end;
-    background: var(--bg-msg-own);
-    border-bottom-right-radius: 4px;
-}
-
-.msg-autor {
-    font-size: 0.75rem;
-    font-weight: 700;
-    color: var(--acento);
-    margin-bottom: 3px;
-}
-
-.msg-texto {
-    font-size: 0.95rem;
-}
-
-.msg-img {
-    max-width: 220px;
-    max-height: 220px;
-    border-radius: 10px;
-    margin-top: 6px;
-    display: block;
-}
+.msg-autor { font-size: 0.75rem; font-weight: 700; color: var(--acento); margin-bottom: 3px; }
+.msg-autor .amigo-badge { color: #fbbf24; margin-left: 4px; }
+.msg-texto { font-size: 0.95rem; }
+.msg-img { max-width: 220px; max-height: 220px; border-radius: 10px; margin-top: 6px; display: block; }
 
 .msg-sistema {
     align-self: center;
@@ -245,15 +166,8 @@ body {
     border-radius: 20px;
 }
 
-.msg-sistema span {
-    font-size: 1.2rem;
-    display: block;
-    margin-bottom: 4px;
-}
-
-.msg.historico {
-    opacity: 0.6;
-}
+.msg-sistema span { font-size: 1.2rem; display: block; margin-bottom: 4px; }
+.msg.historico { opacity: 0.6; }
 
 /* ===== FOOTER ===== */
 .footer {
@@ -268,20 +182,16 @@ body {
 .btn-icon {
     background: none;
     border: none;
-    font-size: 1.4rem;
+    font-size: 1.2rem;
     cursor: pointer;
     padding: 8px;
     border-radius: 50%;
     transition: background var(--transicao);
+    color: var(--texto);
 }
 
-.btn-icon:hover {
-    background: var(--bg-input);
-}
-
-#fileInput {
-    display: none;
-}
+.btn-icon:hover { background: var(--bg-input); }
+#fileInput { display: none; }
 
 .footer input[type="text"] {
     flex: 1;
@@ -295,13 +205,10 @@ body {
     transition: border-color var(--transicao);
 }
 
-.footer input[type="text"]:focus {
-    border-color: var(--acento);
-}
+.footer input[type="text"]:focus { border-color: var(--acento); }
 
 .btn-enviar {
-    width: 44px;
-    height: 44px;
+    width: 44px; height: 44px;
     padding: 0;
     border-radius: 50%;
     display: flex;
@@ -311,18 +218,134 @@ body {
     flex-shrink: 0;
 }
 
+/* ===== GRUPOS ===== */
+.lista-grupos {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.btn-grupo {
+    padding: 14px;
+    border: 1px solid var(--borda);
+    border-radius: var(--raio);
+    background: var(--bg-input);
+    color: var(--texto);
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background var(--transicao), border-color var(--transicao);
+}
+
+.btn-grupo:hover {
+    background: var(--acento);
+    border-color: var(--acento);
+}
+
+/* ===== PAINEL DE AMIGOS ===== */
+.painel-amigos {
+    position: fixed;
+    top: 0; right: 0;
+    width: 300px;
+    height: 100vh;
+    background: var(--bg-card);
+    border-left: 1px solid var(--borda);
+    box-shadow: -10px 0 40px var(--sombra);
+    z-index: 100;
+    animation: slideIn 0.3s ease;
+    overflow-y: auto;
+}
+
+@keyframes slideIn {
+    from { transform: translateX(100%); }
+    to   { transform: translateX(0); }
+}
+
+.painel-conteudo {
+    padding: 24px 20px;
+}
+
+.painel-conteudo h3 {
+    font-size: 1.1rem;
+    margin-bottom: 16px;
+    color: var(--texto);
+}
+
+.lista-amigos {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 20px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.amigo-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    background: var(--bg-input);
+    border-radius: var(--raio);
+    font-size: 0.9rem;
+}
+
+.amigo-item .remover {
+    background: none;
+    border: none;
+    color: #ff6b6b;
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: background var(--transicao);
+}
+
+.amigo-item .remover:hover { background: rgba(255,107,107,0.15); }
+
+.add-amigo {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.add-amigo input {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid var(--borda);
+    border-radius: var(--raio);
+    background: var(--bg-input);
+    color: var(--texto);
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color var(--transicao);
+}
+
+.add-amigo input:focus { border-color: var(--acento); }
+
+.add-amigo .btn-primario {
+    padding: 10px;
+    font-size: 0.9rem;
+}
+
+.btn-fechar {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--borda);
+    border-radius: var(--raio);
+    background: none;
+    color: var(--texto-suave);
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: background var(--transicao);
+}
+
+.btn-fechar:hover { background: var(--bg-input); }
+
 /* ===== RESPONSIVO ===== */
 @media (max-width: 480px) {
-    .card-login {
-        margin: 16px;
-        padding: 36px 24px;
-    }
-
-    .msg {
-        max-width: 85%;
-    }
-
-    .mensagens {
-        padding: 14px;
-    }
+    .card-login { margin: 16px; padding: 36px 24px; }
+    .msg { max-width: 85%; }
+    .mensagens { padding: 14px; }
+    .painel-amigos { width: 100%; }
 }   
