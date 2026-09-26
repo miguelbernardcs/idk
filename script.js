@@ -6,13 +6,13 @@ import {
 } from "firebase/database";
 
 const firebaseConfig = {
-    apiKey: "SUA_API_KEY",
-    authDomain: "meu-chat.firebaseapp.com",
-    databaseURL: "https://meu-chat-default-rtdb.firebaseio.com",
-    projectId: "meu-chat",
-    storageBucket: "meu-chat.appspot.com",
-    messagingSenderId: "123456789",
-    appId: "1:123456789:web:abc123"
+    apiKey: "COLE_SUA_API_KEY_AQUI",
+    authDomain: "COLE_SEU_PROJETO.firebaseapp.com",
+    databaseURL: "https://COLE_SEU_PROJETO-default-rtdb.firebaseio.com",
+    projectId: "COLE_SEU_PROJETO",
+    storageBucket: "COLE_SEU_PROJETO.appspot.com",
+    messagingSenderId: "COLE_SEU_SENDER_ID",
+    appId: "COLE_SEU_APP_ID"
 };
 
 // ⬇️ PERSONALIZE AQUI
@@ -52,6 +52,47 @@ messagesRef = ref(db, "messages");
 usuariosRef = ref(db, "usuarios");
 amigosRef = ref(db, "amigos");
 
+// ===== NOTIFICAÇÕES =====
+function pedirPermissaoNotificacao() {
+    if ("Notification" in window && Notification.permission === "default") {
+        Notification.requestPermission();
+    }
+}
+
+function tocarSom() {
+    try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.frequency.value = 800;
+        gain.gain.setValueAtTime(0.3, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+        osc.start(ctx.currentTime);
+        osc.stop(ctx.currentTime + 0.3);
+    } catch (e) {}
+}
+
+function mostrarNotificacao(titulo, corpo) {
+    if ("Notification" in window && Notification.permission === "granted") {
+        new Notification(titulo, { body: corpo });
+    }
+}
+
+function notificar(dados) {
+    if (dados.nome === nome) return;
+    if (document.hasFocus()) {
+        tocarSom();
+        return;
+    }
+    tocarSom();
+    const corpo = dados.tipo === "imagem"
+        ? `${dados.nome} enviou uma imagem`
+        : `${dados.nome}: ${dados.texto}`;
+    mostrarNotificacao(NOME_DO_CHAT, corpo);
+}
+
 // ===== 1º PASSO: NOME =====
 async function confirmarNome() {
     const nomeInput = document.getElementById("inputNome").value.trim();
@@ -63,18 +104,23 @@ async function confirmarNome() {
     }
 
     nome = nomeInput;
-    const snapshot = await get(child(usuariosRef, nome));
 
-    if (snapshot.exists()) {
-        document.getElementById("nomeSenha").textContent = nome;
-        $nome.classList.add("oculto");
-        $senha.classList.remove("oculto");
-        document.getElementById("inputSenha").focus();
-    } else {
-        document.getElementById("nomeCriar").textContent = nome;
-        $nome.classList.add("oculto");
-        $criarSenha.classList.remove("oculto");
-        document.getElementById("inputNovaSenha").focus();
+    try {
+        const snapshot = await get(child(usuariosRef, nome));
+
+        if (snapshot.exists()) {
+            document.getElementById("nomeSenha").textContent = nome;
+            $nome.classList.add("oculto");
+            $senha.classList.remove("oculto");
+            document.getElementById("inputSenha").focus();
+        } else {
+            document.getElementById("nomeCriar").textContent = nome;
+            $nome.classList.add("oculto");
+            $criarSenha.classList.remove("oculto");
+            document.getElementById("inputNovaSenha").focus();
+        }
+    } catch (e) {
+        erro.textContent = "Algo deu errado. Tente novamente.";
     }
 }
 
@@ -97,8 +143,12 @@ async function criarSenha() {
         return;
     }
 
-    await set(child(usuariosRef, nome), { senha: nova });
-    mostrarGrupos();
+    try {
+        await set(child(usuariosRef, nome), { senha: nova });
+        mostrarGrupos();
+    } catch (e) {
+        erro.textContent = "Erro ao salvar. Tente novamente.";
+    }
 }
 
 document.getElementById("inputNovaSenha").addEventListener("keydown", (e) => {
@@ -113,16 +163,19 @@ async function confirmarSenha() {
     const digitada = document.getElementById("inputSenha").value;
     const erro = document.getElementById("erroSenha");
 
-    const snapshot = await get(child(usuariosRef, nome));
-    if (!snapshot.exists()) {
-        erro.textContent = "Nome não encontrado.";
-        return;
-    }
-
-    if (digitada === snapshot.val().senha) {
-        mostrarGrupos();
-    } else {
-        erro.textContent = "Senha incorreta.";
+    try {
+        const snapshot = await get(child(usuariosRef, nome));
+        if (!snapshot.exists()) {
+            erro.textContent = "Nome não encontrado.";
+            return;
+        }
+        if (digitada === snapshot.val().senha) {
+            mostrarGrupos();
+        } else {
+            erro.textContent = "Senha incorreta.";
+        }
+    } catch (e) {
+        erro.textContent = "Algo deu errado. Tente novamente.";
     }
 }
 
@@ -157,6 +210,7 @@ function entrarNoGrupo(grupo) {
     document.getElementById("meuNome").textContent = `${nome} • ${grupo}`;
     document.getElementById("tituloChatHeader").textContent = grupo;
     $entrada.focus();
+    pedirPermissaoNotificacao();
     iniciarChat();
     carregarAmigos();
 }
@@ -170,7 +224,6 @@ function mudarGrupo() {
 // ===== AMIGOS =====
 function carregarAmigos() {
     if (unsubAmigos) unsubAmigos();
-
     const meuAmigosRef = child(amigosRef, nome);
     unsubAmigos = onValue(meuAmigosRef, (snapshot) => {
         const dados = snapshot.val();
@@ -182,12 +235,10 @@ function carregarAmigos() {
 function renderizarListaAmigos() {
     const lista = document.getElementById("listaAmigos");
     lista.innerHTML = "";
-
     if (meusAmigos.length === 0) {
         lista.innerHTML = `<p style="color:var(--texto-suave);font-size:0.85rem;">Nenhum amigo ainda.</p>`;
         return;
     }
-
     meusAmigos.forEach((amigo) => {
         const div = document.createElement("div");
         div.className = "amigo-item";
@@ -210,12 +261,10 @@ function fecharAmigos() {
 async function adicionarAmigo() {
     const nomeAmigo = document.getElementById("inputAmigo").value.trim();
     if (!nomeAmigo) return;
-
     if (nomeAmigo === nome) {
         alert("Não pode adicionar a si mesmo.");
         return;
     }
-
     const meuAmigosRef = child(amigosRef, nome);
     await update(meuAmigosRef, { [nomeAmigo]: true });
     document.getElementById("inputAmigo").value = "";
@@ -230,7 +279,7 @@ document.getElementById("inputAmigo").addEventListener("keydown", (e) => {
     if (e.key === "Enter") adicionarAmigo();
 });
 
-// ===== CHAT (corrigido) =====
+// ===== CHAT =====
 function iniciarChat() {
     if (unsubChat) unsubChat();
 
@@ -243,6 +292,7 @@ function iniciarChat() {
         const dados = snapshot.val();
         if (dados.grupo === grupoAtual) {
             renderizarMensagem(dados);
+            notificar(dados);
         }
     });
 }
