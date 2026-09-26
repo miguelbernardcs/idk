@@ -1,18 +1,19 @@
-// ===== CONFIGURAÇÃO (personalize aqui) =====
-import { initializeApp } from "firebase/app";
-import {
-    getDatabase, ref, push, onChildAdded,
-    get, set, child, update, onValue
-} from "firebase/database";
+// ===== CONFIGURAÇÃO DO FIREBASE (IMPORTS COMPATÍVEIS COM NAVEGADOR) =====
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { 
+    getDatabase, ref, push, onChildAdded, 
+    get, set, child, update, onValue 
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
 const firebaseConfig = {
-    apiKey: "COLE_SUA_API_KEY_AQUI",
-    authDomain: "COLE_SEU_PROJETO.firebaseapp.com",
-    databaseURL: "https://COLE_SEU_PROJETO-default-rtdb.firebaseio.com",
-    projectId: "COLE_SEU_PROJETO",
-    storageBucket: "COLE_SEU_PROJETO.appspot.com",
-    messagingSenderId: "COLE_SEU_SENDER_ID",
-    appId: "COLE_SEU_APP_ID"
+    apiKey: "AIzaSyCxH1cHvQGzclxy82xTLylyt_s1hm63E84",
+    authDomain: "whattsapp-2-d75f2.firebaseapp.com",
+    databaseURL: "https://whattsapp-2-d75f2-default-rtdb.firebaseio.com",
+    projectId: "whattsapp-2-d75f2",
+    storageBucket: "whattsapp-2-d75f2.firebasestorage.app",
+    messagingSenderId: "381309225011",
+    appId: "1:381309225011:web:a0559ccbc8ee592c707b46",
+    measurementId: "G-MQ374PRBNE"
 };
 
 // ⬇️ PERSONALIZE AQUI
@@ -36,7 +37,7 @@ let unsubChat = null;
 let unsubAmigos = null;
 
 // ===== ELEMENTOS =====
-const $nome       = document.getElementById("telaNome");
+const $nome        = document.getElementById("telaNome");
 const $criarSenha = document.getElementById("telaCriarSenha");
 const $senha      = document.getElementById("telaSenha");
 const $grupos     = document.getElementById("telaGrupos");
@@ -120,7 +121,8 @@ async function confirmarNome() {
             document.getElementById("inputNovaSenha").focus();
         }
     } catch (e) {
-        erro.textContent = "Algo deu errado. Tente novamente.";
+        console.error(e);
+        erro.textContent = "Erro de conexão com o banco de dados.";
     }
 }
 
@@ -320,7 +322,7 @@ function renderizarMensagem(dados) {
 
     if (recebendoHistorico) div.classList.add("historico");
     $msgs.appendChild(div);
-    $msgs.scrollTop = $msgs.scrollHeight;
+    $msgs.scrollTop =$msgs.scrollHeight;
 
     if (recebendoHistorico && $msgs.children.length >= 5) {
         recebendoHistorico = false;
@@ -362,4 +364,16 @@ function enviarImagem(inputEl) {
 
 $entrada.addEventListener("keydown", (e) => {
     if (e.key === "Enter") enviar();
-});   
+});
+
+// ===== EXPOTAR PARA O ESCOPO GLOBAL (HTML ONCLICK) =====
+window.confirmarNome = confirmarNome;
+window.criarSenha = criarSenha;
+window.confirmarSenha = confirmarSenha;
+window.mudarGrupo = mudarGrupo;
+window.abrirAmigos = abrirAmigos;
+window.fecharAmigos = fecharAmigos;
+window.adicionarAmigo = adicionarAmigo;
+window.removerAmigo = removerAmigo;
+window.enviar = enviar;
+window.enviarImagem = enviarImagem;
