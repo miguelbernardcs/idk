@@ -39,7 +39,7 @@ body {
 
 .oculto { display: none !important; }
 
-/* TELA DE AUTENTICAÇÃO (Login / Senha) */
+/* TELA DE AUTENTICAÇÃO (LOGIN / SENHA) */
 .auth-container {
     position: fixed;
     top: 0; left: 0;
