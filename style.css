@@ -1,4 +1,4 @@
-/* ===== VARIÁVEIS E CORES (TEMA ESCURO PADRÃO) ===== */
+/* ===== VARIÁVEIS E CORES (TEMA ROXO PADRÃO) ===== */
 :root {
     --fundo-principal: #121212;
     --fundo-sidebar: #1e1e1e;
@@ -6,24 +6,24 @@
     --fundo-input: #2a2a2a;
     --texto-principal: #e0e0e0;
     --texto-suave: #888888;
-    --cor-primaria: #00a884;
-    --cor-primaria-hover: #008f6f;
+    --cor-primaria: #8b5cf6;       /* Roxo principal */
+    --cor-primaria-hover: #7c3aed; /* Roxo mais escuro para hover */
     --borda-cor: #2c2c2c;
-    --msg-propria: #005c4b;
+    --msg-propria: #4c1d95;        /* Fundo da mensagem própria em tom roxo */
     --msg-outra: #202c33;
 }
 
 body.light-theme {
     --fundo-principal: #f0f2f5;
     --fundo-sidebar: #ffffff;
-    --fundo-chat: #efeae2;
+    --fundo-chat: #f5f3ff;
     --fundo-input: #f0f2f5;
     --texto-principal: #111111;
     --texto-suave: #666666;
-    --cor-primaria: #00a884;
-    --cor-primaria-hover: #008f6f;
+    --cor-primaria: #8b5cf6;       /* Roxo principal */
+    --cor-primaria-hover: #7c3aed; /* Roxo mais escuro para hover */
     --borda-cor: #e1e1e1;
-    --msg-propria: #d9fdd3;
+    --msg-propria: #ede9fe;        /* Fundo claro da mensagem própria em roxo suave */
     --msg-outra: #ffffff;
 }
 
