@@ -1,8 +1,8 @@
-// ===== CONFIGURAÇÃO DO FIREBASE (IMPORTS COMPATÍVEIS COM NAVEGADOR) =====
+// ===== CONFIGURAÇÃO DO FIREBASE =====
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { 
     getDatabase, ref, push, onChildAdded, 
-    get, set, child, update, onValue 
+    get, set, child, update, onValue, query, orderByChild, equalTo 
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
 const firebaseConfig = {
@@ -16,14 +16,13 @@ const firebaseConfig = {
     measurementId: "G-MQ374PRBNE"
 };
 
-// ⬇️ PERSONALIZE AQUI
+// ⬇️ CONFIGURAÇÕES DA APLICAÇÃO
 const NOME_DO_CHAT = "Meu Chat";
 const EMOJI = "💬";
 const GRUPOS = ["Geral", "Trabalho", "Estudos", "Família"];
 
 // ===== APLICAR PERSONALIZAÇÃO =====
 document.getElementById("tituloChat").textContent = NOME_DO_CHAT;
-document.getElementById("tituloChatHeader").textContent = NOME_DO_CHAT;
 document.querySelector(".logo").textContent = EMOJI;
 document.title = NOME_DO_CHAT;
 
@@ -40,8 +39,7 @@ let unsubAmigos = null;
 const $nome        = document.getElementById("telaNome");
 const $criarSenha = document.getElementById("telaCriarSenha");
 const $senha      = document.getElementById("telaSenha");
-const $grupos     = document.getElementById("telaGrupos");
-const $chat       = document.getElementById("telaChat");
+const $appContainer = document.getElementById("appContainer");
 const $msgs       = document.getElementById("mensagens");
 const $entrada    = document.getElementById("entrada");
 const $painelAmigos = document.getElementById("painelAmigos");
@@ -94,7 +92,7 @@ function notificar(dados) {
     mostrarNotificacao(NOME_DO_CHAT, corpo);
 }
 
-// ===== 1º PASSO: NOME =====
+// ===== AUTENTICAÇÃO =====
 async function confirmarNome() {
     const nomeInput = document.getElementById("inputNome").value.trim();
     const erro = document.getElementById("erroNome");
@@ -126,11 +124,6 @@ async function confirmarNome() {
     }
 }
 
-document.getElementById("inputNome").addEventListener("keydown", (e) => {
-    if (e.key === "Enter") confirmarNome();
-});
-
-// ===== 2A: CRIAR SENHA =====
 async function criarSenha() {
     const nova = document.getElementById("inputNovaSenha").value;
     const confirmar = document.getElementById("inputConfirmarSenha").value;
@@ -153,14 +146,6 @@ async function criarSenha() {
     }
 }
 
-document.getElementById("inputNovaSenha").addEventListener("keydown", (e) => {
-    if (e.key === "Enter") document.getElementById("inputConfirmarSenha").focus();
-});
-document.getElementById("inputConfirmarSenha").addEventListener("keydown", (e) => {
-    if (e.key === "Enter") criarSenha();
-});
-
-// ===== 2B: DIGITAR SENHA =====
 async function confirmarSenha() {
     const digitada = document.getElementById("inputSenha").value;
     const erro = document.getElementById("erroSenha");
@@ -181,16 +166,22 @@ async function confirmarSenha() {
     }
 }
 
-document.getElementById("inputSenha").addEventListener("keydown", (e) => {
-    if (e.key === "Enter") confirmarSenha();
-});
+document.getElementById("inputNome").addEventListener("keydown", (e) => { if (e.key === "Enter") confirmarNome(); });
+document.getElementById("inputNovaSenha").addEventListener("keydown", (e) => { if (e.key === "Enter") document.getElementById("inputConfirmarSenha").focus(); });
+document.getElementById("inputConfirmarSenha").addEventListener("keydown", (e) => { if (e.key === "Enter") criarSenha(); });
+document.getElementById("inputSenha").addEventListener("keydown", (e) => { if (e.key === "Enter") confirmarSenha(); });
 
-// ===== 3º PASSO: GRUPO =====
+// ===== NAVEGAÇÃO / GRUPOS =====
 function mostrarGrupos() {
     $criarSenha.classList.add("oculto");
     $senha.classList.add("oculto");
-    $grupos.classList.remove("oculto");
+    $appContainer.classList.remove("oculto");
+    document.getElementById("meuNome").textContent = nome;
     renderizarGrupos();
+    
+    if (GRUPOS.length > 0) {
+        entrarNoGrupo(GRUPOS[0]);
+    }
 }
 
 function renderizarGrupos() {
@@ -207,23 +198,19 @@ function renderizarGrupos() {
 
 function entrarNoGrupo(grupo) {
     grupoAtual = grupo;
-    $grupos.classList.add("oculto");
-    $chat.classList.remove("oculto");
-    document.getElementById("meuNome").textContent = `${nome} • ${grupo}`;
     document.getElementById("tituloChatHeader").textContent = grupo;
+
+    document.querySelectorAll(".btn-grupo").forEach(btn => {
+        btn.classList.toggle("ativo", btn.textContent === grupo);
+    });
+
     $entrada.focus();
     pedirPermissaoNotificacao();
     iniciarChat();
     carregarAmigos();
 }
 
-function mudarGrupo() {
-    $chat.classList.add("oculto");
-    $grupos.classList.remove("oculto");
-    renderizarGrupos();
-}
-
-// ===== AMIGOS =====
+// ===== AMIGOS (COM VALIDAÇÃO DE CONTA EXISTENTE) =====
 function carregarAmigos() {
     if (unsubAmigos) unsubAmigos();
     const meuAmigosRef = child(amigosRef, nome);
@@ -244,8 +231,8 @@ function renderizarListaAmigos() {
     meusAmigos.forEach((amigo) => {
         const div = document.createElement("div");
         div.className = "amigo-item";
-        div.innerHTML = `<span>⭐ ${amigo}</span>
-                         <button class="remover" onclick="removerAmigo('${amigo}')">✕</button>`;
+        div.innerHTML = `<span>⭐ ${escapeHtml(amigo)}</span>
+                         <button class="remover" onclick="removerAmigo('${escapeHtml(amigo)}')">✕</button>`;
         lista.appendChild(div);
     });
 }
@@ -263,13 +250,28 @@ function fecharAmigos() {
 async function adicionarAmigo() {
     const nomeAmigo = document.getElementById("inputAmigo").value.trim();
     if (!nomeAmigo) return;
+
     if (nomeAmigo === nome) {
-        alert("Não pode adicionar a si mesmo.");
+        alert("Você não pode adicionar a si mesmo.");
         return;
     }
-    const meuAmigosRef = child(amigosRef, nome);
-    await update(meuAmigosRef, { [nomeAmigo]: true });
-    document.getElementById("inputAmigo").value = "";
+
+    try {
+        const snapshot = await get(child(usuariosRef, nomeAmigo));
+
+        if (!snapshot.exists()) {
+            alert("Este usuário não existe!");
+            return;
+        }
+
+        const meuAmigosRef = child(amigosRef, nome);
+        await update(meuAmigosRef, { [nomeAmigo]: true });
+        document.getElementById("inputAmigo").value = "";
+
+    } catch (e) {
+        console.error(e);
+        alert("Erro ao verificar o usuário. Tente novamente.");
+    }
 }
 
 async function removerAmigo(nomeAmigo) {
@@ -286,16 +288,16 @@ function iniciarChat() {
     if (unsubChat) unsubChat();
 
     $msgs.innerHTML = `<div class="msg-sistema" id="placeholder">
-        <span>👋</span><p>Bem-vindo! Suas mensagens aparecerão aqui.</p>
+        <span>👋</span><p>Bem-vindo ao grupo ${escapeHtml(grupoAtual)}!</p>
     </div>`;
     recebendoHistorico = true;
 
-    unsubChat = onChildAdded(messagesRef, (snapshot) => {
+    const mensagensGrupoQuery = query(messagesRef, orderByChild("grupo"), equalTo(grupoAtual));
+
+    unsubChat = onChildAdded(mensagensGrupoQuery, (snapshot) => {
         const dados = snapshot.val();
-        if (dados.grupo === grupoAtual) {
-            renderizarMensagem(dados);
-            notificar(dados);
-        }
+        renderizarMensagem(dados);
+        notificar(dados);
     });
 }
 
@@ -306,14 +308,15 @@ function renderizarMensagem(dados) {
     const div = document.createElement("div");
     const ehAmigo = meusAmigos.includes(dados.nome);
     const badge = ehAmigo ? `<span class="amigo-badge">⭐</span>` : "";
+    const nomeEscapado = escapeHtml(dados.nome);
 
     if (dados.tipo === "imagem") {
         div.className = `msg ${dados.nome === nome ? "msg-propria" : "msg-outra"}`;
-        div.innerHTML = `<div class="msg-autor">${dados.nome}${badge}</div>
-                         <img class="msg-img" src="${dados.base64}" alt="imagem">`;
+        div.innerHTML = `<div class="msg-autor">${nomeEscapado}${badge}</div>
+                         <img class="msg-img" src="${escapeHtml(dados.base64)}" alt="imagem">`;
     } else if (dados.tipo === "texto") {
         div.className = `msg ${dados.nome === nome ? "msg-propria" : "msg-outra"}`;
-        div.innerHTML = `<div class="msg-autor">${dados.nome}${badge}</div>
+        div.innerHTML = `<div class="msg-autor">${nomeEscapado}${badge}</div>
                          <div class="msg-texto">${escapeHtml(dados.texto)}</div>`;
     } else {
         div.className = "msg-sistema";
@@ -330,6 +333,7 @@ function renderizarMensagem(dados) {
 }
 
 function escapeHtml(texto) {
+    if (!texto) return "";
     const div = document.createElement("div");
     div.textContent = texto;
     return div.innerHTML;
@@ -338,7 +342,7 @@ function escapeHtml(texto) {
 // ===== ENVIAR =====
 function enviar() {
     const texto = $entrada.value.trim();
-    if (!texto) return;
+    if (!texto || !grupoAtual) return;
     push(messagesRef, {
         tipo: "texto", nome, texto,
         grupo: grupoAtual,
@@ -349,7 +353,7 @@ function enviar() {
 
 function enviarImagem(inputEl) {
     const file = inputEl.files[0];
-    if (!file) return;
+    if (!file || !grupoAtual) return;
     const reader = new FileReader();
     reader.onload = (e) => {
         push(messagesRef, {
@@ -366,11 +370,10 @@ $entrada.addEventListener("keydown", (e) => {
     if (e.key === "Enter") enviar();
 });
 
-// ===== EXPOTAR PARA O ESCOPO GLOBAL (HTML ONCLICK) =====
+// ===== EXPORTAR PARA O HTML (ONCLICK) =====
 window.confirmarNome = confirmarNome;
 window.criarSenha = criarSenha;
 window.confirmarSenha = confirmarSenha;
-window.mudarGrupo = mudarGrupo;
 window.abrirAmigos = abrirAmigos;
 window.fecharAmigos = fecharAmigos;
 window.adicionarAmigo = adicionarAmigo;
