@@ -9,7 +9,7 @@
     --cor-primaria: #8b5cf6;       /* Roxo principal */
     --cor-primaria-hover: #7c3aed; /* Roxo mais escuro para hover */
     --borda-cor: #2c2c2c;
-    --msg-propria: #4c1d95;        /* Fundo da mensagem própria em tom roxo */
+    --msg-propria: #4c1d95;        /* Fundo roxo escuro para mensagem própria */
     --msg-outra: #202c33;
 }
 
@@ -23,7 +23,7 @@ body.light-theme {
     --cor-primaria: #8b5cf6;       /* Roxo principal */
     --cor-primaria-hover: #7c3aed; /* Roxo mais escuro para hover */
     --borda-cor: #e1e1e1;
-    --msg-propria: #ede9fe;        /* Fundo claro da mensagem própria em roxo suave */
+    --msg-propria: #ede9fe;        /* Fundo roxo suave para mensagem própria */
     --msg-outra: #ffffff;
 }
 
