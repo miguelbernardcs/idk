@@ -1,4 +1,3 @@
-// ===== CONFIGURAÇÃO DO FIREBASE =====
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { 
     getDatabase, ref, push, onChildAdded, 
@@ -21,10 +20,12 @@ const EMOJI = "💬";
 let GRUPOS = ["Geral", "Trabalho", "Estudos", "Família"];
 
 document.getElementById("tituloChat").textContent = NOME_DO_CHAT;
+document.getElementById("tituloChatHeaderSidebar").textContent = NOME_DO_CHAT;
 document.querySelector(".logo").textContent = EMOJI;
 document.title = NOME_DO_CHAT;
 
-let nome = localStorage.getItem("chat_usuario") || "";
+let idConta = localStorage.getItem("chat_id_conta") || "";
+let nome = "";
 let grupoAtual = "";
 let recebendoHistorico = true;
 let meusAmigos = [];
@@ -50,26 +51,28 @@ amigosRef = ref(db, "amigos");
 canaisRef = ref(db, "canais");
 presencaRef = ref(db, "presenca");
 
-// ===== VERIFICAÇÃO DE SESSÃO AUTOMÁTICA =====
 window.addEventListener("DOMContentLoaded", async () => {
-    if (nome) {
-        // Verifica se a conta ainda existe no Firebase para dar segurança
+    if (window.innerWidth <= 768) {
+        document.getElementById("btnMenuMobile").style.display = "block";
+    }
+    if (idConta) {
         try {
-            const snapshot = await get(child(usuariosRef, nome));
+            const snapshot = await get(child(usuariosRef, idConta));
             if (snapshot.exists()) {
+                const dadosUser = snapshot.val();
+                nome = dadosUser.nome;
                 mostrarGrupos();
             } else {
-                localStorage.removeItem("chat_usuario");
-                nome = "";
+                localStorage.removeItem("chat_id_conta");
+                idConta = "";
             }
         } catch (e) {
-            // Se falhar a net ao abrir, mantém o utilizador logado com base no cache local
-            mostrarGrupos();
+            nome = localStorage.getItem("chat_nome_cache") || "";
+            if (nome) mostrarGrupos();
         }
     }
 });
 
-// ===== MODAIS PERSONALIZADOS =====
 let modalCallback = null;
 
 function abrirModalPersonalizado({ icone, titulo, mensagem, tipo, placeholder = "" }) {
@@ -119,7 +122,122 @@ window.fecharModalCustomizado = function(resultado) {
     }
 };
 
-// ===== MENU & TEMA =====
+window.atualizarFotoPerfil = async function(inputEl) {
+    const file = inputEl.files[0];
+    if (!file || !idConta) return;
+
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+        const base64Foto = e.target.result;
+        try {
+            await update(child(usuariosRef, idConta), { fotoPerfil: base64Foto });
+            aplicarFotoPerfilNaInterface(base64Foto);
+            await abrirModalPersonalizado({ icone: "✅", titulo: "Sucesso", mensagem: "Foto de perfil atualizada!", tipo: "alert" });
+        } catch (err) {
+            await abrirModalPersonalizado({ icone: "❌", titulo: "Erro", mensagem: "Não foi possível atualizar a foto.", tipo: "alert" });
+        }
+    };
+    reader.readAsDataURL(file);
+    inputEl.value = "";
+};
+
+function aplicarFotoPerfilNaInterface(base64) {
+    const imgEl = document.getElementById("minhaFotoPerfil");
+    const placeholderEl = document.getElementById("minhaFotoPlaceholder");
+    if (imgEl && placeholderEl) {
+        if (base64) {
+            imgEl.src = base64;
+            imgEl.classList.remove("oculta");
+            placeholderEl.classList.add("oculta");
+        } else {
+            imgEl.classList.add("oculto");
+            placeholderEl.classList.remove("oculto");
+        }
+    }
+}
+
+window.abrirMenuConta = async function() {
+    const escolha = await abrirModalPersonalizado({
+        icone: "⚙️",
+        titulo: "Opções de Conta",
+        mensagem: "Escolhe uma opção:\n1. Digita 'Mudar' para alterar o teu nome\n2. Digita 'Deletar' para apagar a tua conta",
+        tipo: "prompt",
+        placeholder: "Mudar ou Deletar"
+    });
+
+    if (!escolha) return;
+    const op = escolha.trim().toLowerCase();
+
+    if (op === "mudar") {
+        const novoNomeInput = await abrirModalPersonalizado({
+            icone: "✏️",
+            titulo: "Mudar Nome de Utilizador",
+            mensagem: "Digite o novo nome pretendido:",
+            tipo: "prompt",
+            placeholder: "Novo nome..."
+        });
+
+        if (!novoNomeInput || !novoNomeInput.trim()) return;
+        const novoNome = novoNomeInput.trim().toLowerCase();
+
+        if (novoNome === nome) {
+            await abrirModalPersonalizado({ icone: "⚠️", titulo: "Aviso", mensagem: "Esse já é o teu nome atual.", tipo: "alert" });
+            return;
+        }
+
+        try {
+            const snapTodos = await get(usuariosRef);
+            let emUso = false;
+            if (snapTodos.exists()) {
+                snapTodos.forEach((childSnap) => {
+                    if (childSnap.key !== idConta && childSnap.val().nome === novoNome) {
+                        emUso = true;
+                    }
+                });
+            }
+
+            if (emUso) {
+                await abrirModalPersonalizado({ icone: "❌", titulo: "Indisponível", mensagem: "Este nome já está em uso por outro utilizador!", tipo: "alert" });
+                return;
+            }
+
+            await remove(child(presencaRef, nome));
+            await update(child(usuariosRef, idConta), { nome: novoNome });
+            
+            nome = novoNome;
+            localStorage.setItem("chat_nome_cache", nome);
+            document.getElementById("meuNome").textContent = `${nome} ⚙️`;
+            
+            await abrirModalPersonalizado({ icone: "✅", titulo: "Sucesso", mensagem: "Nome alterado com sucesso!", tipo: "alert" });
+            location.reload();
+        } catch (e) {
+            await abrirModalPersonalizado({ icone: "❌", titulo: "Erro", mensagem: "Erro ao atualizar o nome.", tipo: "alert" });
+        }
+
+    } else if (op === "deletar") {
+        const confirmarDel = await abrirModalPersonalizado({
+            icone: "⚠️",
+            titulo: "Eliminar Conta",
+            mensagem: "Tens a certeza absoluta? Esta ação apaga os teus dados de acesso permanentemente.",
+            tipo: "confirm"
+        });
+
+        if (confirmarDel) {
+            try {
+                await remove(child(usuariosRef, idConta));
+                await remove(child(amigosRef, idConta));
+                await remove(child(presencaRef, nome));
+                localStorage.removeItem("chat_id_conta");
+                localStorage.removeItem("chat_nome_cache");
+                await abrirModalPersonalizado({ icone: "🗑️", titulo: "Conta Apagada", mensagem: "A tua conta foi eliminada.", tipo: "alert" });
+                location.reload();
+            } catch (e) {
+                await abrirModalPersonalizado({ icone: "❌", titulo: "Erro", mensagem: "Erro ao eliminar a conta.", tipo: "alert" });
+            }
+        }
+    }
+};
+
 window.toggleSidebar = function() {
     document.querySelector(".sidebar").classList.toggle("ativa");
 };
@@ -129,11 +247,11 @@ window.alternarTema = function() {
 };
 
 window.sairDaConta = function() {
-    localStorage.removeItem("chat_usuario");
+    localStorage.removeItem("chat_id_conta");
+    localStorage.removeItem("chat_nome_cache");
     location.reload();
 };
 
-// ===== NOTIFICAÇÕES =====
 function pedirPermissaoNotificacao() {
     if ("Notification" in window && Notification.permission === "default") {
         Notification.requestPermission();
@@ -162,7 +280,7 @@ function mostrarNotificacao(titulo, corpo) {
 }
 
 function notificar(dados) {
-    if (dados.nome.toLowerCase() === nome) return;
+    if (dados.nome && dados.nome.toLowerCase() === nome) return;
     if (document.hasFocus()) {
         tocarSom();
         return;
@@ -187,21 +305,33 @@ function iniciarOuvinteGlobal() {
     });
 }
 
-// ===== AUTENTICAÇÃO =====
-async function confirmarNome() {
+window.confirmarNome = async function() {
     const nomeInput = document.getElementById("inputNome").value.trim();
     const erro = document.getElementById("erroNome");
     if (!nomeInput) { erro.textContent = "Digite um nome."; return; }
-    nome = nomeInput.toLowerCase();
+    const nomeProcurado = nomeInput.toLowerCase();
 
     try {
-        const snapshot = await get(child(usuariosRef, nome));
+        const snapshot = await get(usuariosRef);
+        let contaEncontradaId = null;
+
         if (snapshot.exists()) {
+            snapshot.forEach((childSnap) => {
+                if (childSnap.val().nome === nomeProcurado) {
+                    contaEncontradaId = childSnap.key;
+                }
+            });
+        }
+
+        if (contaEncontradaId) {
+            idConta = contaEncontradaId;
+            nome = nomeProcurado;
             document.getElementById("nomeSenha").textContent = nomeInput;
             $nome.classList.add("oculto");
             $senha.classList.remove("oculto");
             document.getElementById("inputSenha").focus();
         } else {
+            window.tempNovoNome = nomeProcurado;
             document.getElementById("nomeCriar").textContent = nomeInput;
             $nome.classList.add("oculto");
             $criarSenha.classList.remove("oculto");
@@ -210,9 +340,9 @@ async function confirmarNome() {
     } catch (e) {
         erro.textContent = "Erro de conexão.";
     }
-}
+};
 
-async function criarSenha() {
+window.criarSenha = async function() {
     const nova = document.getElementById("inputNovaSenha").value;
     const confirmar = document.getElementById("inputConfirmarSenha").value;
     const erro = document.getElementById("erroCriarSenha");
@@ -220,38 +350,52 @@ async function criarSenha() {
     if (nova !== confirmar) { erro.textContent = "As senhas não conferem."; return; }
 
     try {
-        await set(child(usuariosRef, nome), { senha: nova });
-        localStorage.setItem("chat_usuario", nome);
+        const novoRef = push(usuariosRef);
+        idConta = novoRef.key;
+        nome = window.tempNovoNome;
+
+        await set(novoRef, { nome: nome, senha: nova, fotoPerfil: "" });
+        localStorage.setItem("chat_id_conta", idConta);
+        localStorage.setItem("chat_nome_cache", nome);
         mostrarGrupos();
     } catch (e) { erro.textContent = "Erro ao salvar."; }
-}
+};
 
-async function confirmarSenha() {
+window.confirmarSenha = async function() {
     const digitada = document.getElementById("inputSenha").value;
     const erro = document.getElementById("erroSenha");
     try {
-        const snapshot = await get(child(usuariosRef, nome));
-        if (!snapshot.exists()) { erro.textContent = "Nome não encontrado."; return; }
+        const snapshot = await get(child(usuariosRef, idConta));
+        if (!snapshot.exists()) { erro.textContent = "Conta não encontrada."; return; }
         if (digitada === snapshot.val().senha) {
-            localStorage.setItem("chat_usuario", nome);
+            nome = snapshot.val().nome;
+            localStorage.setItem("chat_id_conta", idConta);
+            localStorage.setItem("chat_nome_cache", nome);
             mostrarGrupos();
         } else { erro.textContent = "Senha incorreta."; }
     } catch (e) { erro.textContent = "Erro."; }
-}
+};
 
 document.getElementById("inputNome").addEventListener("keydown", (e) => { if (e.key === "Enter") confirmarNome(); });
 document.getElementById("inputNovaSenha").addEventListener("keydown", (e) => { if (e.key === "Enter") document.getElementById("inputConfirmarSenha").focus(); });
 document.getElementById("inputConfirmarSenha").addEventListener("keydown", (e) => { if (e.key === "Enter") criarSenha(); });
 document.getElementById("inputSenha").addEventListener("keydown", (e) => { if (e.key === "Enter") confirmarSenha(); });
 
-// ===== NAVEGAÇÃO / CANAIS =====
-function mostrarGrupos() {
+async function mostrarGrupos() {
     $nome.classList.add("oculto");
     $criarSenha.classList.add("oculto");
     $senha.classList.add("oculto");
     $appContainer.classList.remove("oculto");
-    document.getElementById("meuNome").textContent = nome;
-    document.getElementById("meuNome").title = nome;
+    
+    document.getElementById("meuNome").textContent = `${nome} ⚙️`;
+
+    try {
+        const snap = await get(child(usuariosRef, idConta));
+        if (snap.exists() && snap.val().fotoPerfil) {
+            aplicarFotoPerfilNaInterface(snap.val().fotoPerfil);
+        }
+    } catch (e) {}
+
     carregarCanaisDinâmicos();
     iniciarPresenca();
     iniciarOuvinteGlobal();
@@ -315,10 +459,8 @@ function entrarNoGrupo(grupo) {
     carregarAmigos();
 }
 
-// ===== PRESENÇA AUTOMÁTICA (ONLINE / OFFLINE) =====
 function iniciarPresenca() {
     const meuPresencaRef = child(presencaRef, nome);
-    
     set(meuPresencaRef, "online");
     onDisconnect(meuPresencaRef).set("offline");
     
@@ -343,10 +485,9 @@ function iniciarPresenca() {
     });
 }
 
-// ===== AMIGOS =====
 function carregarAmigos() {
     if (unsubAmigos) unsubAmigos();
-    unsubAmigos = onValue(child(amigosRef, nome), (snapshot) => {
+    unsubAmigos = onValue(child(amigosRef, idConta), (snapshot) => {
         const dados = snapshot.val();
         meusAmigos = dados ? Object.keys(dados) : [];
         renderizarListaAmigos();
@@ -384,12 +525,19 @@ window.adicionarAmigo = async function() {
     }
 
     try {
-        const snapshot = await get(child(usuariosRef, nomeAmigo));
-        if (!snapshot.exists()) {
+        const snapshot = await get(usuariosRef);
+        let existe = false;
+        if (snapshot.exists()) {
+            snapshot.forEach((childSnap) => {
+                if (childSnap.val().nome === nomeAmigo) existe = true;
+            });
+        }
+
+        if (!existe) {
             await abrirModalPersonalizado({ icone: "❌", titulo: "Erro", mensagem: "Este usuário não existe!", tipo: "alert" });
             return;
         }
-        await update(child(amigosRef, nome), { [nomeAmigo]: true });
+        await update(child(amigosRef, idConta), { [nomeAmigo]: true });
         inputEl.value = "";
     } catch (e) {
         await abrirModalPersonalizado({ icone: "❌", titulo: "Erro", mensagem: "Erro ao verificar o usuário.", tipo: "alert" });
@@ -397,20 +545,19 @@ window.adicionarAmigo = async function() {
 };
 
 window.removerAmigo = async (amigo) => {
-    await update(child(amigosRef, nome), { [amigo]: null });
+    await update(child(amigosRef, idConta), { [amigo]: null });
 };
 
 document.getElementById("inputAmigo")?.addEventListener("keydown", (e) => { if (e.key === "Enter") adicionarAmigo(); });
 
-// ===== CHAT =====
 function iniciarChat() {
     if (unsubChat) unsubChat();
     $msgs.innerHTML = `<div class="msg-sistema" id="placeholder"><span>👋</span><p>Bem-vindo ao canal #${escapeHtml(grupoAtual)}!</p></div>`;
     recebendoHistorico = true;
 
     const mensagensGrupoQuery = query(messagesRef, orderByChild("grupo"), equalTo(grupoAtual));
-    unsubChat = onChildAdded(mensagensGrupoQuery, (snapshot) => {
-        renderizarMensagem(snapshot.key, snapshot.val());
+    unsubChat = onChildAdded(mensagensGrupoQuery, async (snapshot) => {
+        await renderizarMensagem(snapshot.key, snapshot.val());
     });
 }
 
@@ -420,7 +567,24 @@ function formatarHora(ts) {
     return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
 }
 
-function renderizarMensagem(idMsg, dados) {
+async function buscarFotoUsuario(nomeUtilizador) {
+    try {
+        const snapshot = await get(usuariosRef);
+        if (snapshot.exists()) {
+            let foto = "";
+            snapshot.forEach((childSnap) => {
+                const dados = childSnap.val();
+                if (dados.nome === nomeUtilizador && dados.fotoPerfil) {
+                    foto = dados.fotoPerfil;
+                }
+            });
+            return foto;
+        }
+    } catch (e) {}
+    return "";
+}
+
+async function renderizarMensagem(idMsg, dados) {
     const placeholder = document.getElementById("placeholder");
     if (placeholder) placeholder.remove();
     if (document.getElementById(`msg-${idMsg}`)) return;
@@ -437,9 +601,15 @@ function renderizarMensagem(idMsg, dados) {
     div.className = `msg ${ehMinha ? "msg-propria" : "msg-outra"}`;
     div.id = `msg-${idMsg}`;
 
+    const fotoUrl = await buscarFotoUsuario(autorMin);
+    let avatarHtml = `<div class="msg-avatar">${inicial}</div>`;
+    if (fotoUrl) {
+        avatarHtml = `<img class="msg-avatar-img" src="${fotoUrl}" alt="Avatar">`;
+    }
+
     const cabecalhoHtml = `
         <div class="msg-cabecalho">
-            <div class="msg-avatar">${inicial}</div>
+            ${avatarHtml}
             <div class="msg-autor">${nomeEscapado}${badge}</div>
             ${ehMinha ? `<button class="btn-apagar" onclick="apagarMensagem('${idMsg}')" title="Apagar">🗑️</button>` : ''}
         </div>
@@ -505,14 +675,3 @@ window.enviarImagem = function(inputEl) {
 };
 
 $entrada.addEventListener("keydown", (e) => { if (e.key === "Enter") enviar(); });
-
-// Exports
-window.confirmarNome = confirmarNome;
-window.criarSenha = criarSenha;
-window.confirmarSenha = confirmarSenha;
-window.abrirAmigos = abrirAmigos;
-window.fecharAmigos = fecharAmigos;
-window.adicionarAmigo = adicionarAmigo;
-window.removerAmigo = removerAmigo;
-window.enviar = enviar;
-window.enviarImagem = enviarImagem;
