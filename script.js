@@ -1,4 +1,4 @@
-// ===== CONFIGURAÇÃO DO FIREBASE (IMPORTS COMPATÍVEIS COM NAVEGADOR) =====
+// ===== CONFIGURAÇÃO DO FIREBASE =====
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { 
     getDatabase, ref, push, onChildAdded, 
@@ -80,7 +80,7 @@ function mostrarNotificacao(titulo, corpo) {
 }
 
 function notificar(dados) {
-    if (dados.nome === nome) return;
+    if (dados.nome.toLowerCase() === nome) return;
     if (document.hasFocus()) {
         tocarSom();
         return;
@@ -92,7 +92,7 @@ function notificar(dados) {
     mostrarNotificacao(NOME_DO_CHAT, corpo);
 }
 
-// ===== AUTENTICAÇÃO (CASE INSENSITIVE) =====
+// ===== AUTENTICAÇÃO (PADRONIZADA EM MINÚSCULAS) =====
 async function confirmarNome() {
     const nomeInput = document.getElementById("inputNome").value.trim();
     const erro = document.getElementById("erroNome");
@@ -102,7 +102,7 @@ async function confirmarNome() {
         return;
     }
 
-    // Padroniza em minúsculas para ignorar maiúsculas/minúsculas no banco
+    // Padroniza internamente tudo em minúsculas
     nome = nomeInput.toLowerCase();
 
     try {
@@ -211,7 +211,7 @@ function entrarNoGrupo(grupo) {
     carregarAmigos();
 }
 
-// ===== AMIGOS (VALIDAÇÃO DE UTILIZADOR E CASE INSENSITIVE) =====
+// ===== AMIGOS =====
 function carregarAmigos() {
     if (unsubAmigos) unsubAmigos();
     const meuAmigosRef = child(amigosRef, nome);
@@ -310,16 +310,17 @@ function renderizarMensagem(dados) {
     if (placeholder) placeholder.remove();
 
     const div = document.createElement("div");
-    const ehAmigo = meusAmigos.includes(dados.nome.toLowerCase());
+    const autorMin = dados.nome ? dados.nome.toLowerCase() : "";
+    const ehAmigo = meusAmigos.includes(autorMin);
     const badge = ehAmigo ? `<span class="amigo-badge">⭐</span>` : "";
     const nomeEscapado = escapeHtml(dados.nome);
 
     if (dados.tipo === "imagem") {
-        div.className = `msg ${dados.nome.toLowerCase() === nome ? "msg-propria" : "msg-outra"}`;
+        div.className = `msg ${autorMin === nome ? "msg-propria" : "msg-outra"}`;
         div.innerHTML = `<div class="msg-autor">${nomeEscapado}${badge}</div>
                          <img class="msg-img" src="${escapeHtml(dados.base64)}" alt="imagem">`;
     } else if (dados.tipo === "texto") {
-        div.className = `msg ${dados.nome.toLowerCase() === nome ? "msg-propria" : "msg-outra"}`;
+        div.className = `msg ${autorMin === nome ? "msg-propria" : "msg-outra"}`;
         div.innerHTML = `<div class="msg-autor">${nomeEscapado}${badge}</div>
                          <div class="msg-texto">${escapeHtml(dados.texto)}</div>`;
     } else {
@@ -374,7 +375,7 @@ $entrada.addEventListener("keydown", (e) => {
     if (e.key === "Enter") enviar();
 });
 
-// ===== EXPORTAR PARA O HTML (ONCLICK) =====
+// ===== EXPORTAR PARA O HTML =====
 window.confirmarNome = confirmarNome;
 window.criarSenha = criarSenha;
 window.confirmarSenha = confirmarSenha;
