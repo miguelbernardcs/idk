@@ -1,4 +1,4 @@
-// ===== CONFIGURAÇÃO DO FIREBASE =====
+// ===== CONFIGURAÇÃO DO FIREBASE (IMPORTS COMPATÍVEIS COM NAVEGADOR) =====
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { 
     getDatabase, ref, push, onChildAdded, 
@@ -16,7 +16,7 @@ const firebaseConfig = {
     measurementId: "G-MQ374PRBNE"
 };
 
-// ⬇️ CONFIGURAÇÕES DA APLICAÇÃO
+// ⬇️ PERSONALIZAÇÃO
 const NOME_DO_CHAT = "Meu Chat";
 const EMOJI = "💬";
 const GRUPOS = ["Geral", "Trabalho", "Estudos", "Família"];
@@ -92,7 +92,7 @@ function notificar(dados) {
     mostrarNotificacao(NOME_DO_CHAT, corpo);
 }
 
-// ===== AUTENTICAÇÃO =====
+// ===== AUTENTICAÇÃO (CASE INSENSITIVE) =====
 async function confirmarNome() {
     const nomeInput = document.getElementById("inputNome").value.trim();
     const erro = document.getElementById("erroNome");
@@ -102,18 +102,19 @@ async function confirmarNome() {
         return;
     }
 
-    nome = nomeInput;
+    // Padroniza em minúsculas para ignorar maiúsculas/minúsculas no banco
+    nome = nomeInput.toLowerCase();
 
     try {
         const snapshot = await get(child(usuariosRef, nome));
 
         if (snapshot.exists()) {
-            document.getElementById("nomeSenha").textContent = nome;
+            document.getElementById("nomeSenha").textContent = nomeInput;
             $nome.classList.add("oculto");
             $senha.classList.remove("oculto");
             document.getElementById("inputSenha").focus();
         } else {
-            document.getElementById("nomeCriar").textContent = nome;
+            document.getElementById("nomeCriar").textContent = nomeInput;
             $nome.classList.add("oculto");
             $criarSenha.classList.remove("oculto");
             document.getElementById("inputNovaSenha").focus();
@@ -210,7 +211,7 @@ function entrarNoGrupo(grupo) {
     carregarAmigos();
 }
 
-// ===== AMIGOS (COM VALIDAÇÃO DE CONTA EXISTENTE) =====
+// ===== AMIGOS (VALIDAÇÃO DE UTILIZADOR E CASE INSENSITIVE) =====
 function carregarAmigos() {
     if (unsubAmigos) unsubAmigos();
     const meuAmigosRef = child(amigosRef, nome);
@@ -248,8 +249,11 @@ function fecharAmigos() {
 }
 
 async function adicionarAmigo() {
-    const nomeAmigo = document.getElementById("inputAmigo").value.trim();
-    if (!nomeAmigo) return;
+    const inputEl = document.getElementById("inputAmigo");
+    const nomeAmigoInput = inputEl.value.trim();
+    if (!nomeAmigoInput) return;
+
+    const nomeAmigo = nomeAmigoInput.toLowerCase();
 
     if (nomeAmigo === nome) {
         alert("Você não pode adicionar a si mesmo.");
@@ -266,7 +270,7 @@ async function adicionarAmigo() {
 
         const meuAmigosRef = child(amigosRef, nome);
         await update(meuAmigosRef, { [nomeAmigo]: true });
-        document.getElementById("inputAmigo").value = "";
+        inputEl.value = "";
 
     } catch (e) {
         console.error(e);
@@ -306,16 +310,16 @@ function renderizarMensagem(dados) {
     if (placeholder) placeholder.remove();
 
     const div = document.createElement("div");
-    const ehAmigo = meusAmigos.includes(dados.nome);
+    const ehAmigo = meusAmigos.includes(dados.nome.toLowerCase());
     const badge = ehAmigo ? `<span class="amigo-badge">⭐</span>` : "";
     const nomeEscapado = escapeHtml(dados.nome);
 
     if (dados.tipo === "imagem") {
-        div.className = `msg ${dados.nome === nome ? "msg-propria" : "msg-outra"}`;
+        div.className = `msg ${dados.nome.toLowerCase() === nome ? "msg-propria" : "msg-outra"}`;
         div.innerHTML = `<div class="msg-autor">${nomeEscapado}${badge}</div>
                          <img class="msg-img" src="${escapeHtml(dados.base64)}" alt="imagem">`;
     } else if (dados.tipo === "texto") {
-        div.className = `msg ${dados.nome === nome ? "msg-propria" : "msg-outra"}`;
+        div.className = `msg ${dados.nome.toLowerCase() === nome ? "msg-propria" : "msg-outra"}`;
         div.innerHTML = `<div class="msg-autor">${nomeEscapado}${badge}</div>
                          <div class="msg-texto">${escapeHtml(dados.texto)}</div>`;
     } else {
