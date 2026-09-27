@@ -51,11 +51,12 @@
         <!-- BARRA LATERAL (SIDEBAR) -->
         <div class="sidebar">
             <div class="sidebar-header">
-                <div class="meu-nome" id="meuNome">Utilizador</div>
+                <div class="meu-nome" id="meuNome" title="Utilizador">Utilizador</div>
                 <div class="sidebar-actions">
                     <button onclick="abrirCriarCanal()" title="Criar Canal">+</button>
                     <button onclick="abrirAmigos()" title="Amigos">⭐</button>
                     <button onclick="alternarTema()" title="Mudar Tema">🌓</button>
+                    <button onclick="sairDaConta()" title="Terminar Sessão" style="color: #ff6b6b;">🚪</button>
                 </div>
             </div>
 
@@ -104,6 +105,22 @@
             <button class="btn-fechar" onclick="fecharAmigos()">Fechar</button>
         </div>
 
+    </div>
+
+    <!-- ===== MODAL PERSONALIZADO ===== -->
+    <div id="modalCustomizado" class="tela-login oculto" style="background: rgba(0,0,0,0.7);">
+        <div class="card-login" style="width: 380px;">
+            <div class="logo" id="modalIcone">💬</div>
+            <h2 id="modalTitulo" style="font-size: 1.3rem; margin-bottom: 8px;">Título</h2>
+            <p class="subtitulo" id="modalMensagem" style="margin-bottom: 16px;">Mensagem...</p>
+            
+            <input type="text" id="modalInput" class="oculto" placeholder="Digite aqui..." autocomplete="off">
+            
+            <div style="display: flex; gap: 10px; margin-top: 10px;">
+                <button id="modalBtnCancelar" class="btn-fechar oculto" onclick="fecharModalCustomizado(false)">Cancelar</button>
+                <button id="modalBtnConfirmar" class="btn-primario" onclick="fecharModalCustomizado(true)">OK</button>
+            </div>
+        </div>
     </div>
 
     <script type="module" src="script.js"></script>
