@@ -20,16 +20,14 @@ const NOME_DO_CHAT = "PoĹux";
 const LOGO_SVG = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🌟</text></svg>';
 let GRUPOS = ["Geral", "Trabalho", "Estudos", "Família"];
 
-
-// Aplicar configurações iniciais visuais se os elementos existirem
-if (document.getElementById("tituloChat")) document.getElementById("tituloChat").textContent = NOME_DO_CHAT;
-if (document.getElementById("tituloChatHeaderSidebar")) document.getElementById("tituloChatHeaderSidebar").textContent = NOME_DO_CHAT;
-if (document.querySelector(".logo")) document.querySelector(".logo").textContent = LOGO_SVG;
+document.getElementById("tituloChat").textContent = NOME_DO_CHAT;
+document.getElementById("tituloChatHeaderSidebar").textContent = NOME_DO_CHAT;
+document.querySelector(".logo").textContent = LOGO_SVG;
 document.title = NOME_DO_CHAT;
 
 let idConta = localStorage.getItem("chat_id_conta") || "";
 let nome = "";
-let grupoAtual = "geral";
+let grupoAtual = "";
 let recebendoHistorico = true;
 let meusAmigos = [];
 let mensagensNaoLidas = {};
@@ -56,8 +54,8 @@ presencaRef = ref(db, "presenca");
 
 window.addEventListener("DOMContentLoaded", async () => {
     if (window.innerWidth <= 768) {
-        const btnMenuMobile = document.getElementById("btnMenuMobile");
-        if (btnMenuMobile) btnMenuMobile.style.display = "block";
+        const btnMenu = document.getElementById("btnMenuMobile");
+        if (btnMenu) btnMenu.style.display = "block";
     }
     if (idConta) {
         try {
@@ -84,27 +82,23 @@ function abrirModalPersonalizado({ icone, titulo, mensagem, tipo, placeholder = 
         const modal = document.getElementById("modalCustomizado");
         if (!modal) { resolve(tipo === "prompt" ? "" : true); return; }
         
-        const elIcone = document.getElementById("modalIcone");
-        const elTitulo = document.getElementById("modalTitulo");
-        const elMensagem = document.getElementById("modalMensagem");
-        
-        if (elIcone) elIcone.textContent = icone || "💬";
-        if (elTitulo) elTitulo.textContent = titulo;
-        if (elMensagem) elMensagem.textContent = mensagem;
+        document.getElementById("modalIcone").textContent = icone || "💬";
+        document.getElementById("modalTitulo").textContent = titulo;
+        document.getElementById("modalMensagem").textContent = mensagem;
         
         const input = document.getElementById("modalInput");
         const btnCancelar = document.getElementById("modalBtnCancelar");
         
-        if (tipo === "prompt" && input && btnCancelar) {
+        if (tipo === "prompt") {
             input.classList.remove("oculto");
             input.value = "";
             input.placeholder = placeholder;
             btnCancelar.classList.remove("oculto");
             setTimeout(() => input.focus(), 50);
-        } else if (tipo === "confirm" && input && btnCancelar) {
+        } else if (tipo === "confirm") {
             input.classList.add("oculto");
             btnCancelar.classList.remove("oculto");
-        } else if (input && btnCancelar) {
+        } else {
             input.classList.add("oculto");
             btnCancelar.classList.add("oculto");
         }
@@ -142,8 +136,9 @@ window.atualizarFotoPerfil = async function(inputEl) {
         try {
             await update(child(usuariosRef, idConta), { fotoPerfil: base64Foto });
             aplicarFotoPerfilNaInterface(base64Foto);
+            await abrirModalPersonalizado({ icone: "✅", titulo: "Sucesso", mensagem: "Foto de perfil atualizada!", tipo: "alert" });
         } catch (err) {
-            console.error(err);
+            await abrirModalPersonalizado({ icone: "❌", titulo: "Erro", mensagem: "Não foi possível atualizar a foto.", tipo: "alert" });
         }
     };
     reader.readAsDataURL(file);
@@ -156,8 +151,8 @@ function aplicarFotoPerfilNaInterface(base64) {
     if (imgEl && placeholderEl) {
         if (base64) {
             imgEl.src = base64;
-            imgEl.classList.remove("oculto");
-            placeholderEl.classList.add("oculto");
+            imgEl.classList.remove("oculta", "oculto");
+            placeholderEl.classList.add("oculta", "oculto");
         } else {
             imgEl.classList.add("oculto");
             placeholderEl.classList.remove("oculto");
@@ -218,16 +213,17 @@ window.abrirMenuConta = async function() {
             const meuNomeEl = document.getElementById("meuNome");
             if (meuNomeEl) meuNomeEl.textContent = `${nome} ⚙️`;
             
+            await abrirModalPersonalizado({ icone: "✅", titulo: "Sucesso", mensagem: "Nome alterado com sucesso!", tipo: "alert" });
             location.reload();
         } catch (e) {
-            console.error(e);
+            await abrirModalPersonalizado({ icone: "❌", titulo: "Erro", mensagem: "Erro ao atualizar o nome.", tipo: "alert" });
         }
 
     } else if (op === "deletar") {
         const confirmarDel = await abrirModalPersonalizado({
             icone: "⚠️",
             titulo: "Eliminar Conta",
-            mensagem: "Tens a certeza absoluta? Esta ação apaga os teus dados permanentemente.",
+            mensagem: "Tens a certeza absoluta? Esta ação apaga os teus dados de acesso permanentemente.",
             tipo: "confirm"
         });
 
@@ -238,9 +234,10 @@ window.abrirMenuConta = async function() {
                 await remove(child(presencaRef, nome));
                 localStorage.removeItem("chat_id_conta");
                 localStorage.removeItem("chat_nome_cache");
+                await abrirModalPersonalizado({ icone: "🗑️", titulo: "Conta Apagada", mensagem: "A tua conta foi eliminada.", tipo: "alert" });
                 location.reload();
             } catch (e) {
-                console.error(e);
+                await abrirModalPersonalizado({ icone: "❌", titulo: "Erro", mensagem: "Erro ao eliminar a conta.", tipo: "alert" });
             }
         }
     }
@@ -282,6 +279,23 @@ function tocarSom() {
     } catch (e) {}
 }
 
+function mostrarNotificacao(titulo, corpo) {
+    if ("Notification" in window && Notification.permission === "granted") {
+        new Notification(titulo, { body: corpo });
+    }
+}
+
+function notificar(dados) {
+    if (dados.nome && dados.nome.toLowerCase() === nome) return;
+    tocarSom();
+    if (!document.hasFocus()) {
+        const corpo = dados.tipo === "imagem"
+            ? `${dados.nome} enviou uma imagem no grupo ${dados.grupo}`
+            : `${dados.nome} (${dados.grupo}): ${dados.texto}`;
+        mostrarNotificacao(NOME_DO_CHAT, corpo);
+    }
+}
+
 function iniciarOuvinteGlobal() {
     if (unsubGlobalNotif) unsubGlobalNotif();
     unsubGlobalNotif = onChildAdded(messagesRef, (snapshot) => {
@@ -291,15 +305,15 @@ function iniciarOuvinteGlobal() {
             mensagensNaoLidas[dados.grupo] = true;
             carregarCanaisDinâmicos();
         }
+        notificar(dados);
     });
 }
 
-window.verificarNome = async function() {
-    const inputNome = document.getElementById("inputNome");
+window.confirmarNome = async function() {
+    const inputEl = document.getElementById("inputNome");
     const erro = document.getElementById("erroNome");
-    if (!inputNome) return;
-    
-    const nomeInput = inputNome.value.trim();
+    if (!inputEl) return;
+    const nomeInput = inputEl.value.trim();
     if (!nomeInput) { if (erro) erro.textContent = "Digite um nome."; return; }
     const nomeProcurado = nomeInput.toLowerCase();
 
@@ -318,16 +332,16 @@ window.verificarNome = async function() {
         if (contaEncontradaId) {
             idConta = contaEncontradaId;
             nome = nomeProcurado;
-            const nomeSenha = document.getElementById("nomeSenha");
-            if (nomeSenha) nomeSenha.textContent = nomeInput;
+            const nomeSenhaEl = document.getElementById("nomeSenha");
+            if (nomeSenhaEl) nomeSenhaEl.textContent = nomeInput;
             if ($nome)$nome.classList.add("oculto");
             if ($senha)$senha.classList.remove("oculto");
             const inputSenha = document.getElementById("inputSenha");
             if (inputSenha) inputSenha.focus();
         } else {
             window.tempNovoNome = nomeProcurado;
-            const nomeCriar = document.getElementById("nomeCriar");
-            if (nomeCriar) nomeCriar.textContent = nomeInput;
+            const nomeCriarEl = document.getElementById("nomeCriar");
+            if (nomeCriarEl) nomeCriarEl.textContent = nomeInput;
             if ($nome)$nome.classList.add("oculto");
             if ($criarSenha)$criarSenha.classList.remove("oculto");
             const inputNovaSenha = document.getElementById("inputNovaSenha");
@@ -338,9 +352,9 @@ window.verificarNome = async function() {
     }
 };
 
-window.registarConta = async function() {
-    const nova = document.getElementById("inputNovaSenha").value;
-    const confirmar = document.getElementById("inputConfirmarSenha").value;
+window.criarSenha = async function() {
+    const nova = document.getElementById("inputNovaSenha")?.value || "";
+    const confirmar = document.getElementById("inputConfirmarSenha")?.value || "";
     const erro = document.getElementById("erroCriarSenha");
     if (nova.length < 4) { if (erro) erro.textContent = "Mínimo 4 caracteres."; return; }
     if (nova !== confirmar) { if (erro) erro.textContent = "As senhas não conferem."; return; }
@@ -354,13 +368,11 @@ window.registarConta = async function() {
         localStorage.setItem("chat_id_conta", idConta);
         localStorage.setItem("chat_nome_cache", nome);
         mostrarGrupos();
-    } catch (e) { 
-        if (erro) erro.textContent = "Erro ao salvar."; 
-    }
+    } catch (e) { if (erro) erro.textContent = "Erro ao salvar."; }
 };
 
-window.entrarConta = async function() {
-    const digitada = document.getElementById("inputSenha").value;
+window.confirmarSenha = async function() {
+    const digitada = document.getElementById("inputSenha")?.value || "";
     const erro = document.getElementById("erroSenha");
     try {
         const snapshot = await get(child(usuariosRef, idConta));
@@ -374,18 +386,10 @@ window.entrarConta = async function() {
     } catch (e) { if (erro) erro.textContent = "Erro."; }
 };
 
-// Listeners de Teclado para Autenticação
-const inputNomeEl = document.getElementById("inputNome");
-if (inputNomeEl) inputNomeEl.addEventListener("keydown", (e) => { if (e.key === "Enter") verificarNome(); });
-
-const inputNovaSenhaEl = document.getElementById("inputNovaSenha");
-if (inputNovaSenhaEl) inputNovaSenhaEl.addEventListener("keydown", (e) => { if (e.key === "Enter") document.getElementById("inputConfirmarSenha").focus(); });
-
-const inputConfirmarSenhaEl = document.getElementById("inputConfirmarSenha");
-if (inputConfirmarSenhaEl) inputConfirmarSenhaEl.addEventListener("keydown", (e) => { if (e.key === "Enter") registarConta(); });
-
-const inputSenhaEl = document.getElementById("inputSenha");
-if (inputSenhaEl) inputSenhaEl.addEventListener("keydown", (e) => { if (e.key === "Enter") entrarConta(); });
+document.getElementById("inputNome")?.addEventListener("keydown", (e) => { if (e.key === "Enter") window.confirmarNome(); });
+document.getElementById("inputNovaSenha")?.addEventListener("keydown", (e) => { if (e.key === "Enter") document.getElementById("inputConfirmarSenha")?.focus(); });
+document.getElementById("inputConfirmarSenha")?.addEventListener("keydown", (e) => { if (e.key === "Enter") window.criarSenha(); });
+document.getElementById("inputSenha")?.addEventListener("keydown", (e) => { if (e.key === "Enter") window.confirmarSenha(); });
 
 async function mostrarGrupos() {
     if ($nome)$nome.classList.add("oculto");
@@ -447,7 +451,7 @@ window.abrirCriarCanal = async function() {
         titulo: "Criar Novo Canal",
         mensagem: "Digite o nome para o novo canal:",
         tipo: "prompt",
-        placeholder: "Ex: jogos, filmes..."
+        placeholder: "Ex: Jogos, Filmes..."
     });
 
     if (!nomeNovo || !nomeNovo.trim()) return;
@@ -549,7 +553,7 @@ window.adicionarAmigo = async function() {
         await update(child(amigosRef, idConta), { [nomeAmigo]: true });
         inputEl.value = "";
     } catch (e) {
-        console.error(e);
+        await abrirModalPersonalizado({ icone: "❌", titulo: "Erro", mensagem: "Erro ao verificar o usuário.", tipo: "alert" });
     }
 };
 
@@ -557,12 +561,12 @@ window.removerAmigo = async (amigo) => {
     await update(child(amigosRef, idConta), { [amigo]: null });
 };
 
-const inputAmigoEl = document.getElementById("inputAmigo");
-if (inputAmigoEl) inputAmigoEl.addEventListener("keydown", (e) => { if (e.key === "Enter") adicionarAmigo(); });
+document.getElementById("inputAmigo")?.addEventListener("keydown", (e) => { if (e.key === "Enter") window.adicionarAmigo(); });
 
 function iniciarChat() {
     if (unsubChat) unsubChat();
-    if ($msgs)$msgs.innerHTML = `<div class="msg-sistema" id="placeholder"><span>👋</span><p>Bem-vindo ao canal #${escapeHtml(grupoAtual)}!</p></div>`;
+    if ($msgs) {$msgs.innerHTML = `<div class="msg-sistema" id="placeholder"><span>👋</span><p>Bem-vindo ao canal #${escapeHtml(grupoAtual)}!</p></div>`;
+    }
     recebendoHistorico = true;
 
     const mensagensGrupoQuery = query(messagesRef, orderByChild("grupo"), equalTo(grupoAtual));
@@ -686,5 +690,4 @@ window.enviarImagem = function(inputEl) {
     inputEl.value = "";
 };
 
-if ($entrada) {$entrada.addEventListener("keydown", (e) => { if (e.key === "Enter") enviar(); });
-}
+$entrada?.addEventListener("keydown", (e) => { if (e.key === "Enter") window.enviar(); });
