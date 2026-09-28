@@ -16,18 +16,27 @@ const firebaseConfig = {
 };
 
 const NOME_DO_CHAT = "PoĹux";
-// Guardamos o código do seu SVG nesta variável:
-const LOGO_SVG = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em"</svg>';
+// LINHA 20: Constante atualizada em Base64 puro para evitar bloqueio do Chromium
+const LOGO_SVG = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSI+PGVsbGlwc2UgY3g9IjEyIiBjeT0iMTIigcng9IjEwIiByeT0iNCIgdHJhbnNmb3JtPSJyb3RhdGUoLTMwIDEyIDEyKSIgc3Ryb2tlPSIjNmM2M2ZmIiBzdHJva2Utd2lkdGg9IjEuNSIgc3Ryb2tlLWRhc2hhcnJheT0iMyAzIi8+PHBhdGggZD0iTTEyIDJMMTQuNCA5LjZMMjIgMTJMMTQuNCAxNC40TDEyIDIyTDkuNiAxNC40TDIgMTJMOS42IDkuNkwxMiAyWiIgZmlsbD0iIzZjNjNmZiIvPjwvc3ZnPg==';
 let GRUPOS = ["Geral", "Trabalho", "Estudos", "Família"];
 
 document.getElementById("tituloChat").textContent = NOME_DO_CHAT;
 document.getElementById("tituloChatHeaderSidebar").textContent = NOME_DO_CHAT;
 document.title = NOME_DO_CHAT;
 
-// 1. Faz o ícone da aba do navegador usar o SVG do JS automaticamente
-const linkIconeHTML = document.querySelector("link[rel='icon']");
-if (linkIconeHTML) {
-    linkIconeHTML.setAttribute("href", LOGO_SVG);
+// Força a recriação do nó do Favicon deletando o antigo e injetando um novo
+document.querySelectorAll("link[rel*='icon']").forEach(el => el.remove());
+
+const novoFavicon = document.createElement('link');
+novoFavicon.rel = 'icon';
+novoFavicon.type = 'image/svg+xml';
+novoFavicon.href = LOGO_SVG;
+document.head.appendChild(novoFavicon);
+
+// Renderiza a mesma logo na barra lateral interna do app
+const logoEl = document.querySelector(".logo");
+if (logoEl) {
+    logoEl.innerHTML = `<img src="${LOGO_SVG}" style="width: 24px; height: 24px; object-fit: contain;">`;
 }
 
 // 2. Renderiza a mesma logo de forma visual correta na barra lateral
