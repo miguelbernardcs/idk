@@ -3,16 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Meu Chat</title>
-    <!-- Liga o teu CSS externo aqui se preferires -->
+    <title>PoĹux</title>
+    <!-- Ícone personalizado de estrela na aba do navegador -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌟</text></svg>">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
     <!-- TELA 1: DIGITAR NOME -->
     <div id="telaNome" class="auth-container">
-        <span style="font-size: 3rem;">💬</span>
-        <h2 id="tituloChat">Meu Chat</h2>
+        <div class="logo-aura-grande" style="margin-bottom: 15px;">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(-30 12 12)" stroke="#6c63ff" stroke-width="1.5" stroke-dasharray="3 3"/>
+                <path d="M12 2L14.4 9.6L22 12L14.4 14.4L12 22L9.6 14.4L2 12L9.6 9.6L12 2Z" fill="#6c63ff"/>
+            </svg>
+        </div>
+        <h2 id="tituloChat">PoĹux</h2>
         <input type="text" id="inputNome" placeholder="Digite seu nome..." autocomplete="off">
         <div id="erroNome" class="erro"></div>
         <button onclick="confirmarNome()">Continuar</button>
@@ -20,7 +26,12 @@
 
     <!-- TELA 2: CRIAR SENHA (PRIMEIRO ACESSO) -->
     <div id="telaCriarSenha" class="auth-container oculto">
-        <span style="font-size: 3rem;">🔒</span>
+        <div class="logo-aura-grande" style="margin-bottom: 15px;">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(-30 12 12)" stroke="#6c63ff" stroke-width="1.5" stroke-dasharray="3 3"/>
+                <path d="M12 2L14.4 9.6L22 12L14.4 14.4L12 22L9.6 14.4L2 12L9.6 9.6L12 2Z" fill="#6c63ff"/>
+            </svg>
+        </div>
         <h2>Criar Senha</h2>
         <p style="font-size:0.85rem; color:var(--texto-suave); margin-bottom:15px;">O nome <strong id="nomeCriar"></strong> é novo. Crie uma senha de acesso:</p>
         <input type="password" id="inputNovaSenha" placeholder="Mínimo 4 caracteres">
@@ -31,7 +42,12 @@
 
     <!-- TELA 3: DIGITAR SENHA (CONTA JÁ EXISTENTE) -->
     <div id="telaSenha" class="auth-container oculto">
-        <span style="font-size: 3rem;">🔑</span>
+        <div class="logo-aura-grande" style="margin-bottom: 15px;">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(-30 12 12)" stroke="#6c63ff" stroke-width="1.5" stroke-dasharray="3 3"/>
+                <path d="M12 2L14.4 9.6L22 12L14.4 14.4L12 22L9.6 14.4L2 12L9.6 9.6L12 2Z" fill="#6c63ff"/>
+            </svg>
+        </div>
         <h2>Bem-vindo de volta</h2>
         <p style="font-size:0.85rem; color:var(--texto-suave); margin-bottom:15px;">Insira a senha da conta <strong id="nomeSenha"></strong>:</p>
         <input type="password" id="inputSenha" placeholder="Sua senha...">
@@ -46,22 +62,42 @@
         <div class="sidebar">
             <div class="sidebar-header">
                 <div class="logo-area">
-                    <span class="logo">💬</span>
-                    <span id="tituloChatHeaderSidebar">Meu Chat</span>
+                    <svg class="logo" width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(-30 12 12)" stroke="#6c63ff" stroke-width="1.5" stroke-dasharray="3 3"/>
+                        <path d="M12 2L14.4 9.6L22 12L14.4 14.4L12 22L9.6 14.4L2 12L9.6 9.6L12 2Z" fill="#6c63ff"/>
+                    </svg>
+                    <span id="tituloChatHeaderSidebar">PoĹux</span>
                 </div>
                 <div class="sidebar-acoes">
-                    <button class="btn-icone" onclick="abrirAmigos()" title="Amigos">⭐</button>
-                    <button class="btn-icone" onclick="alternarTema()" title="Mudar Tema">🌓</button>
-                    <button class="btn-icone" onclick="sairDaConta()" title="Sair">🚪</button>
+                    <button class="btn-icone" onclick="abrirAmigos()" title="Amigos">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                    </button>
+                    <button class="btn-icone" onclick="alternarTema()" title="Mudar Tema">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                    </button>
+                    <button class="btn-icone" onclick="sairDaConta()" title="Sair">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                    </button>
                 </div>
             </div>
 
-            <!-- PERFIL COM FOTO -->
+            <!-- PERFIL COM CÂMARA SVG SIMPLIFICADA NO HOVER -->
             <div class="user-profile-section">
                 <div class="avatar-container" onclick="document.getElementById('inputFotoPerfil').click()" title="Mudar foto de perfil">
                     <img id="minhaFotoPerfil" src="" alt="Perfil" class="foto-perfil-img oculta">
-                    <div id="minhaFotoPlaceholder" class="foto-perfil-placeholder">👤</div>
-                    <div class="camera-overlay">📷</div>
+                    <div id="minhaFotoPlaceholder" class="foto-perfil-placeholder">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(-30 12 12)" stroke="#6c63ff" stroke-width="1.5" stroke-dasharray="3 3"/>
+                            <path d="M12 2L14.4 9.6L22 12L14.4 14.4L12 22L9.6 14.4L2 12L9.6 9.6L12 2Z" fill="#6c63ff"/>
+                        </svg>
+                    </div>
+                    <div class="camera-overlay">
+                        <!-- Câmara SVG limpa e moderna -->
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                            <circle cx="12" cy="13" r="4"></circle>
+                        </svg>
+                    </div>
                 </div>
                 <span id="meuNome" onclick="abrirMenuConta()" title="Gerir Conta">Nome</span>
                 <input type="file" id="inputFotoPerfil" accept="image/*" class="oculto" onchange="atualizarFotoPerfil(this)">
@@ -69,7 +105,7 @@
 
             <div class="sidebar-secao">
                 <span>Canais</span>
-                <button class="btn-icone" onclick="abrirCriarCanal()" title="Criar Canal" style="font-size:0.9rem;">➕</button>
+                <button class="btn-icone" onclick="abrirCriarCanal()" title="Criar Canal" style="font-size:0.9rem;">+</button>
             </div>
             
             <div class="lista-scroll" id="listaGrupos">
@@ -88,7 +124,7 @@
         <div class="chat-area">
             <div class="chat-header">
                 <div class="chat-header-info">
-                    <button class="btn-icone" onclick="toggleSidebar()" style="display:none;" id="btnMenuMobile">☰</button>
+                    <button class="btn-icone" onclick="toggleSidebar()" id="btnMenuMobile">☰</button>
                     <span id="tituloChatHeader"># canal</span>
                 </div>
             </div>
@@ -98,7 +134,13 @@
             </div>
 
             <div class="chat-input-area">
-                <button class="btn-icone" onclick="document.getElementById('inputImg').click()" title="Enviar Imagem" style="font-size: 1.3rem;">📷</button>
+                <!-- Botão de câmara SVG minimalista e bonito para enviar imagem -->
+                <button class="btn-icone" onclick="document.getElementById('inputImg').click()" title="Enviar Imagem">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                        <circle cx="12" cy="13" r="4"></circle>
+                    </svg>
+                </button>
                 <input type="file" id="inputImg" accept="image/*" class="oculto" onchange="enviarImagem(this)">
                 <input type="text" id="entrada" placeholder="Escreva uma mensagem..." autocomplete="off">
                 <button class="btn-enviar" onclick="enviar()">Enviar</button>
@@ -109,7 +151,7 @@
     <!-- PAINEL DE AMIGOS -->
     <div id="painelAmigos" class="painel-lateral oculto">
         <div class="painel-header">
-            <span>Os Meus Amigos ⭐</span>
+            <span>Os Meus Amigos</span>
             <button class="btn-icone" onclick="fecharAmigos()">✕</button>
         </div>
         <div class="painel-conteudo">
@@ -126,7 +168,12 @@
     <!-- MODAL PERSONALIZADO GLOBAL -->
     <div id="modalCustomizado" class="modal-overlay oculto">
         <div class="modal-box">
-            <div id="modalIcone" class="modal-icon">💬</div>
+            <div id="modalIcone" class="modal-icon">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(-30 12 12)" stroke="#6c63ff" stroke-width="1.5" stroke-dasharray="3 3"/>
+                    <path d="M12 2L14.4 9.6L22 12L14.4 14.4L12 22L9.6 14.4L2 12L9.6 9.6L12 2Z" fill="#6c63ff"/>
+                </svg>
+            </div>
             <div id="modalTitulo" class="modal-title">Título</div>
             <div id="modalMensagem" class="modal-msg">Mensagem descritiva aqui.</div>
             <input type="text" id="modalInput" class="modal-input oculto" placeholder="">
@@ -137,7 +184,6 @@
         </div>
     </div>
 
-    <!-- Liga o teu JS externo aqui -->
     <script type="module" src="script.js"></script>
 </body>
 </html>
