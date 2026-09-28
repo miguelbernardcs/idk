@@ -17,7 +17,7 @@ const firebaseConfig = {
 
 const NOME_DO_CHAT = "PoĹux";
 // Guardamos o código do seu SVG nesta variável:
-const LOGO_SVG = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🌟</text></svg>';
+const LOGO_SVG = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em"</svg>';
 let GRUPOS = ["Geral", "Trabalho", "Estudos", "Família"];
 
 document.getElementById("tituloChat").textContent = NOME_DO_CHAT;
