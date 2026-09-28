@@ -15,14 +15,19 @@ const firebaseConfig = {
     measurementId: "G-MQ374PRBNE"
 };
 
-const NOME_DO_CHAT = "Meu Chat";
-const EMOJI = "💬";
+// CORTAR A PARTIR DAQUI (LINHA 16):
+const NOME_DO_CHAT = "PoĹux";
+// Guardamos o código do seu SVG nesta variável:
+const LOGO_SVG = 'data:image/svg+xml,<svg xmlns="http://w3.org" viewBox="0 0 100 100"><text y=".9em" font-size="90">🌟</text></svg>';
 let GRUPOS = ["Geral", "Trabalho", "Estudos", "Família"];
+
 
 document.getElementById("tituloChat").textContent = NOME_DO_CHAT;
 document.getElementById("tituloChatHeaderSidebar").textContent = NOME_DO_CHAT;
-document.querySelector(".logo").textContent = EMOJI;
+document.querySelector(".logo").textContent = LOGO_SVG;
 document.title = NOME_DO_CHAT;
+// APAGAR ATÉ AQUI (LINHA 31)
+
 
 let idConta = localStorage.getItem("chat_id_conta") || "";
 let nome = "";
