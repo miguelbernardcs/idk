@@ -22,8 +22,19 @@ let GRUPOS = ["Geral", "Trabalho", "Estudos", "Família"];
 
 document.getElementById("tituloChat").textContent = NOME_DO_CHAT;
 document.getElementById("tituloChatHeaderSidebar").textContent = NOME_DO_CHAT;
-document.querySelector(".logo").textContent = LOGO_SVG;
 document.title = NOME_DO_CHAT;
+
+// 1. Faz o ícone da aba do navegador usar o SVG do JS automaticamente
+const linkIconeHTML = document.querySelector("link[rel='icon']");
+if (linkIconeHTML) {
+    linkIconeHTML.setAttribute("href", LOGO_SVG);
+}
+
+// 2. Renderiza a mesma logo de forma visual correta na barra lateral
+const logoEl = document.querySelector(".logo");
+if (logoEl) {
+    logoEl.innerHTML = `<img src="${LOGO_SVG}" style="width: 24px; height: 24px; object-fit: contain;">`;
+}
 
 let idConta = localStorage.getItem("chat_id_conta") || "";
 let nome = "";
