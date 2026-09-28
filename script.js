@@ -15,16 +15,13 @@ const firebaseConfig = {
     measurementId: "G-MQ374PRBNE"
 };
 
+const NOME_DO_CHAT = "Meu Chat";
+const EMOJI = "💬";
+let GRUPOS = ["Geral", "Trabalho", "Estudos", "Família"];
+
 document.getElementById("tituloChat").textContent = NOME_DO_CHAT;
 document.getElementById("tituloChatHeaderSidebar").textContent = NOME_DO_CHAT;
-document.title = NOME_DO_CHAT;
-
-// Seleciona o elemento .logo e insere a imagem SVG perfeitamente centralizada
-const logoEl = document.querySelector(".logo");
-if (logoEl) {
-    logoEl.innerHTML = `<img src='${LOGO_SVG}' style='width: 24px; height: 24px; object-fit: contain;'>`;
-}
-
+document.querySelector(".logo").textContent = EMOJI;
 document.title = NOME_DO_CHAT;
 
 let idConta = localStorage.getItem("chat_id_conta") || "";
